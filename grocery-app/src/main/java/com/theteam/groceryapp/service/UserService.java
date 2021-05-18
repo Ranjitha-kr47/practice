@@ -1,16 +1,12 @@
 package com.theteam.groceryapp.service;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
+import com.theteam.groceryapp.dao.UserRegistrationDao;
 import com.theteam.groceryapp.entity.User;
-import com.theteam.groceryapp.repository.UserRepository;
 
-@Service
-public class UserService {
-	@Autowired
-	private UserRepository userRepository;
-	
-	
+
+
+public interface UserService extends UserDetailsService{
+	User save(UserRegistrationDao registration);
 }
