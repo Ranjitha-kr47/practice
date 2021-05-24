@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
-import {RouterModule,Routes} from '@angular/router';
+import {Router, RouterModule,Routes} from '@angular/router';
+import {FormsModule} from '@angular/forms';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -10,7 +11,7 @@ import {FontAwesomeModule} from '@fortawesome/fontawesome-free';
 import { ProductListComponent } from './components/product-list/product-list.component';
 import { ProductCategoryComponent } from './components/product-category/product-category.component';
 import { SearchComponent } from './components/search/search.component';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
 import { ProductService } from './services/product.service';
 import { CartService } from './services/cart.service';
 import { ProductDetailsComponent } from './components/product-details/product-details.component';
@@ -21,7 +22,27 @@ import { OrderHistoryComponent } from './components/order-history/order-history.
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ContactUsComponent } from './components/contact-us/contact-us.component';
 import { AboutUsComponent } from './components/about-us/about-us.component';
+import { LoginComponent } from './components/login/login.component';
+import { LoginStatusComponent } from './components/login-status/login-status.component';
+import { AuthenticationService } from './services/authentication.service';
+import {
+  OKTA_CONFIG,
+  OktaAuthModule,
+  OktaCallbackComponent,
+  OktaAuthGuard
+} from '@okta/okta-angular';
+import myAppConfig from './config/my-app-config';
 import { NavigationComponent } from './components/navigation/navigation.component';
+import { HomeComponent } from './components/home/home.component';
+
+const oktaConfig = Object.assign({
+  onAuthRequired: (oktaAuth, injector) => {
+    const router = injector.get(Router);
+
+    // Redirect the user to your custom login page
+    router.navigate(['/login']);
+  }
+}, myAppConfig.oidc);
 
 @NgModule({
   declarations: [
@@ -36,7 +57,10 @@ import { NavigationComponent } from './components/navigation/navigation.componen
     OrderHistoryComponent,
     ContactUsComponent,
     AboutUsComponent,
-    NavigationComponent
+    LoginComponent,
+    LoginStatusComponent,
+    NavigationComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -44,9 +68,12 @@ import { NavigationComponent } from './components/navigation/navigation.componen
     HttpClientModule,
     ReactiveFormsModule,
     NgbModule,
-    RouterModule
+    RouterModule,
+    FormsModule,
+    OktaAuthModule
   ],
-  providers: [ProductService,CartService],
+  providers: [ProductService, { provide: OKTA_CONFIG, useValue:oktaConfig },
+    {provide: HTTP_INTERCEPTORS, useClass: AuthenticationService, multi: true}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
